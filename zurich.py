@@ -1,32 +1,34 @@
 
-import pygame, random
+import pygame
+import random
 
 
+class store:
+   def __init__(self):
+       self.dict = {}
+   # add an object to the dictionary
+   def add(self, obj):
+       # if obj is a list, add each item in the list
+       if type(obj) is list:
+           for i in obj:
+               self.dict[i.tag] = i
+       else:
+           self.dict[obj.tag] = obj
+   # remove an object from the dictionary
+   def remove(self, obj):
+       # if obj is a list, remove each item in the list
+       if type(obj) is list:
+           for i in obj:
+               del self.dict[i.tag]
+       else:
+           del self.dict[obj.tag]
+   # remove all items in the dictionary
+   def remove_all(self):
+       # remove all items in the dictionary
+       self.dict = {}
 
-class store():
-    def __init__(self):
-        self.dict={}
-    def add(self,obj):
-        if type(obj) is list:
-            for i in obj:
-                self.dict[i.tag]=i
-        else:
-            self.dict[obj.tag]=obj
 
-    def remove(self, obj):
-        try:
-            del self.dict[obj]
-        except:
-            pass
-
-    def remove_all(self):
-        self.dict={}
-
-
-        
-
-
-
+# child class of store
 class objects(store):
     def __init__(self):
         super().__init__()
@@ -55,6 +57,7 @@ class objects(store):
 
 class buttons_set(store):
     def check(self,buttons):
+        # check if button is pressed
         pos=pygame.mouse.get_pos()
         try:
             for i in self.dict:

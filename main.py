@@ -12,6 +12,7 @@ def quit():
     pygame.quit()
     sys.exit()
 
+
 def change_to_scene_1():
     global switch
     switch=1
@@ -75,9 +76,11 @@ def change_to_scene_5():
     
 
 def check_file():
+    # check if file is open
     os.startfile("person.txt")
     running=True
     while running==True:
+        # check if file is open and if it is then wait
         running="notepad.exe" in (i.name() for i in psutil.process_iter())
 
 def back_to_menu():
@@ -87,58 +90,68 @@ def back_to_menu():
     object_list.add_set([runmain,exit])
 
 def create_place_house():
+    # create houses and place them on the screen
     rect=house_list.make()
     object_list.add(rect)
 
 def place_house():
+    # place houses on the screen
     for x in house_list.dict:
         object_list.add(house_list.dict[x].obj)
 
 def get_random_bool(chance):
+    # get a random bool with a chance of chance
     if random.random()<chance:
         return True
     else:
         return False
 
 def check_collision():
+    # check if people collide with each other
     for x in infectedlist.sprites():
+        # uses sprite collision
         blocks_hit_list = pygame.sprite.spritecollide(x, group_people, False, pygame.sprite.collide_circle)
         for y in blocks_hit_list:
+            # if they collide then check if the other person is infected
             if y.dict["infected"]:
                 pass
             else:
                 try:
+                    #draw line between them
                     pygame.draw.line(screen,"black",x.path[0],y.path[0])
                 except:
                     pass
+                # if they are not infected then check if they get infected
                 chance=float(people_group.dict["infection_chance_spread"])
                 if get_random_bool(chance):
                     if y.dict["infected"]==False:
                         y.dict["infected"]=True
                         y.change_colour("red")
                         people_group.infected+=1
+                # if they are infected then check if they die
                 if get_random_bool(float(people_group.dict["die_chance"])):
                     people_group.infected-=1
                     try:
                         people_group.people.remove(x)
                     except:
                         pass
+                # if they are infected then check if they get better
                 elif get_random_bool(float(people_group.dict["get_better_chance"])):
                     people_group.infected-=1
                     x.dict["infected"]=False
                     x.change_colour("blue")
-    
-
-                
-                    
 
 def move_check_new():
+    # check if people move
     for x in (people_group.people):
+        # if they are not in a house then check if they move
         if get_random_bool(float(people_group.dict["move_chance"])):
             if x not in group_people.sprites():
+                # if they move then get a random house and move to it
                 y=house_list.dict[random.randint(1,len(house_list.dict))]
                 g=y.loc
                 if x.house.loc!=y.loc:
+                    # if they are not in the house then move to the house
                     x.dict["goto"]=[g[0]+5,g[1]+5]
                     x.dict["inHouse"]=False
                     x.dict["gotoHouse"]=y
@@ -150,27 +163,30 @@ def move_check_new():
                         noninfectedlist.add(x)
                     group_people.add(x)
 
-
 def scene_main_menu(running,num,select_run):
     num+=1
     screen.fill("black")
     if num>=len(image_of_house_run):
         num=0
 
+    # check for events
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
             running = False
             num=0
 
+        # check if mouse is lifted after clicked
         if event.type == pygame.MOUSEBUTTONUP:
             select_run=False
 
+        # check if mouse is clicked
         if event.type == pygame.MOUSEBUTTONDOWN:
             select_run=True
             select.make()
             buttons.check(buttons)
 
+    # draw the background
     screen.blit(image_of_house_run[num], (0, 0))
     for x in object_list.dict:
         object_list.dict[x].draw(screen)
@@ -199,11 +215,13 @@ def scene_initialise(running,num,select_run):
             select.make()
             buttons.check(buttons)
 
+        # check if key is pressed
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 object_list.remove_all_set()
                 object_list.add_set(menu)
 
+        # check if key is lifted
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 object_list.remove_all_set()
@@ -288,12 +306,15 @@ def scene_simulation(running,num,select_run,speed=5,num2=0,time_elapsed_since_la
     if speed<1:
         speed=1
     
+    # draw the scene
     for x in object_list.dict:
         object_list.dict[x].draw(screen)
     
+    # gets the time since the last frame
     dt = clock.get_time() 
     num2+=time_elapsed_since_last_action
     time_elapsed_since_last_action += dt
+    # checks if 200ms has passed since the last action
     if time_elapsed_since_last_action > 200:
 
         if people_group.infected<0:
@@ -302,6 +323,7 @@ def scene_simulation(running,num,select_run,speed=5,num2=0,time_elapsed_since_la
         object_list.dict["infectcounter"].change_text_nobox(str(people_group.infected))
         
         time_elapsed_since_last_action = 0
+        # saves the number of people and the number of infected people
         values[num2/10000]=len(people_group.people)
         values2[num2/10000]=people_group.infected
     return [running,num,select_run,speed,num2,time_elapsed_since_last_action,values,values2]
@@ -312,6 +334,7 @@ from zurich import *
 pygame.init()
 pygame.display.set_caption('NEA')
 
+# load the icon and images
 Icon = pygame.image.load('images/a.png')
 image = pygame.image.load('images/house1.png')
 main_image1 = pygame.transform.scale(image, (500, 500))
@@ -382,10 +405,14 @@ switch=0
 num=0
 running = True
 while running:
+    # main loop
     pygame.display.set_caption("Fps: " + str(int(clock.get_fps())))
     if switch==0:
+        # runs the scene
         args=scene_main_menu(*args)
+        #updates the screen
         pygame.display.flip()
+        # sets the fps
         clock.tick(10)
     if switch==1:
         args=scene_initialise(*args)
@@ -401,5 +428,5 @@ while running:
         pygame.display.flip()
         clock.tick()
     num+=1
-
+    # updates the variables
     running= args[0]
